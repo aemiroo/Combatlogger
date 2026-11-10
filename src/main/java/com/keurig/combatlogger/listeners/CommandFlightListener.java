@@ -49,7 +49,12 @@ public class CommandFlightListener implements Listener {
             return;
         }
 
-        hook.disableFlight(player);
+        try {
+            hook.disableFlight(player);
+        } catch (RuntimeException ex) {
+            plugin.getLogger().warning("Factions flight integration failed: " + ex.getMessage());
+        }
+
         Chat.message(player, "&cYou cannot fly during combat!");
         event.setCancelled(true);
     }
