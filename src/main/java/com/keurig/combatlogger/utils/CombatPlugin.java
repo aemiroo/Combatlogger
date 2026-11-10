@@ -92,7 +92,7 @@ public class CombatPlugin extends JavaPlugin {
                         && (method.getParameterTypes()[1] == double.class
                         || method.getParameterTypes()[1] == Double.class)) {
                     Object response = method.invoke(economyAPI, player, amount);
-                    if (response != null && response.getClass().getMethod("transactionSuccess").isAccessible()) {
+                    if (response != null) {
                         return (Boolean) response.getClass().getMethod("transactionSuccess").invoke(response);
                     }
                     return true;
