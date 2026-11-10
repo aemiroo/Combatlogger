@@ -63,8 +63,10 @@ public class PunishmentManager {
     }
 
     public void onQuit(Player player) {
-        Map<Punishment, Map<String, Object>> arguments = config.getPunishmentArgs(player);
-        for (Punishment punishment : config.getPunishments(player)) {
+        Set<Punishment> selectedPunishments = config.getPunishments(player);
+        Map<Punishment, Map<String, Object>> arguments =
+                config.getPunishmentArgs(player, selectedPunishments);
+        for (Punishment punishment : selectedPunishments) {
             punishment.setArgs(arguments.get(punishment));
             punishment.setPlayer(player);
             punishment.setPunishmentConfig(config);
