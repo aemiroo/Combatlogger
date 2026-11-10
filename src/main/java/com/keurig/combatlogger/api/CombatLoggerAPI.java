@@ -16,10 +16,11 @@ public class CombatLoggerAPI {
      * @return True if the player is tagged in combat, otherwise false.
      */
     public static boolean isTagged(Player player) {
-        final Map<UUID, Long> combatLogged = CombatLogger.getInstance().getCombatPlayer().getCombatLogged();
-        if (player == null) {
+        if (player == null || CombatLogger.getInstance() == null
+                || CombatLogger.getInstance().getCombatPlayer() == null) {
             return false;
         }
+        final Map<UUID, Long> combatLogged = CombatLogger.getInstance().getCombatPlayer().getCombatLogged();
         Long expiresAt = combatLogged.get(player.getUniqueId());
         return expiresAt != null && expiresAt.longValue() > System.currentTimeMillis();
     }
@@ -31,6 +32,10 @@ public class CombatLoggerAPI {
      * @param tag    True to tag the player in combat, false to remove the tag.
      */
     public static void setTagged(Player player, boolean tag) {
+        if (player == null || CombatLogger.getInstance() == null
+                || CombatLogger.getInstance().getCombatPlayer() == null) {
+            return;
+        }
         CombatPlayer combatPlayer = CombatLogger.getInstance().getCombatPlayer();
 
         if (tag) {
@@ -58,12 +63,8 @@ public class CombatLoggerAPI {
 
     public static long getRemainingTime(Player player) {
         long remainingTimeMillis = timeRemaining(player);
-        long remainingSeconds = remainingTimeMillis / 1000;
-
-        if (remainingTimeMillis % 1000 >= 500) {
-            remainingSeconds++; // Round up if milliseconds are 500 or more
-        }
-
-        return Math.max(0, remainingSeconds);
+        long remainingSeconds = remainingTimeMillis == 0L
+                ? 0L : (remainingTimeMillis + 999L) / 1000L;
+        return Math.max(0L, remainingSeconds);
     }
 }
