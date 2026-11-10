@@ -63,7 +63,7 @@ public class CombatPlayer {
      */
     public void addCombat(Player player, Player opponent) {
         if (player == null || opponent == null
-                || player.getUniqueId().equals(opponent.getUniqueId())) {
+                || !CombatRules.isValidPlayerPair(player.getUniqueId(), opponent.getUniqueId())) {
             return;
         }
 
