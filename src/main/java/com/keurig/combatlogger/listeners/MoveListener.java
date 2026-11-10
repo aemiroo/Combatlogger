@@ -16,9 +16,16 @@ import java.util.Map;
 
 public class MoveListener implements Listener {
 
-    private final CombatLogger plugin = CombatLogger.getInstance();
+    private final CombatLogger plugin;
+    private final List<String> regions;
     private final Map<String, Object> regionCache = new HashMap<String, Object>();
     private boolean worldGuardWarningLogged;
+
+    public MoveListener() {
+        this.plugin = CombatLogger.getInstance();
+        this.regions = new java.util.ArrayList<String>(
+                plugin.getConfig().getStringList("protected-regions.regions"));
+    }
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
@@ -40,7 +47,6 @@ public class MoveListener implements Listener {
             from.setY(to.getY());
         }
 
-        List<String> regions = plugin.getConfig().getStringList("protected-regions.regions");
         for (String regionName : regions) {
             try {
                 if (isInsideRegion(player.getWorld(), regionName, to)
