@@ -51,11 +51,17 @@ public class CombatPlugin extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
+        try {
+            RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+            if (rsp == null || rsp.getProvider() == null) {
+                economyAPI = null;
+                return false;
+            }
+            economyAPI = rsp.getProvider();
+        } catch (NoClassDefFoundError ex) {
+            economyAPI = null;
             return false;
         }
-        economyAPI = rsp.getProvider();
         return true;
     }
 
@@ -63,7 +69,7 @@ public class CombatPlugin extends JavaPlugin {
 
         try {
             RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-            permissionAPI = rsp.getProvider();
+            permissionAPI = rsp == null ? null : rsp.getProvider();
         } catch (NoClassDefFoundError e) {
             return false;
         }
