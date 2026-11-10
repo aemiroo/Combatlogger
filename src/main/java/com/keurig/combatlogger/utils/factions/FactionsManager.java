@@ -28,8 +28,10 @@ public class FactionsManager {
             Bukkit.getPluginManager().registerEvents(new CommandFlightListener(), plugin);
             this.factionsEnabled = true;
             Chat.log("Enabled MassiveCraft FactionsUUID support");
-        } catch (ClassNotFoundException ex) {
-            plugin.getLogger().warning("Factions is installed, but its API is not compatible. Factions-specific flight handling is disabled.");
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException ex) {
+            this.factionsEnabled = false;
+            this.factionsHook = null;
+            plugin.getLogger().warning("Factions is installed, but its API is not compatible. Factions-specific flight handling is disabled: " + ex.getMessage());
         }
     }
 }
