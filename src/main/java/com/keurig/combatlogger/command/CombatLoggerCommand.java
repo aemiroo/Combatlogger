@@ -15,7 +15,7 @@ public class CombatLoggerCommand implements CommandExecutor, TabCompleter {
 
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         CombatLogger plugin = CombatLogger.getInstance();
 
         if (!sender.hasPermission("combatlogger.command") && !sender.isOp()) {
@@ -54,8 +54,8 @@ public class CombatLoggerCommand implements CommandExecutor, TabCompleter {
         return false;
     }
 
-        @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         return java.util.Arrays.asList("info", "reload");
     }
 }
