@@ -2,7 +2,6 @@ package com.keurig.combatlogger.punishment;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
@@ -11,7 +10,6 @@ import java.util.Map;
 
 @Getter
 @Setter
-@ToString
 public abstract class Punishment implements Listener {
 
     /**
