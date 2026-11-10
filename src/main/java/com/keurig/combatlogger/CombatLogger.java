@@ -8,7 +8,6 @@ import com.keurig.combatlogger.punishment.PunishmentManager;
 import com.keurig.combatlogger.punishment.punishments.EcoPunishment;
 import com.keurig.combatlogger.utils.Chat;
 import com.keurig.combatlogger.utils.CombatPlugin;
-import com.keurig.combatlogger.utils.PlaceholderAPIHook;
 import com.keurig.combatlogger.utils.factions.FactionsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -24,8 +23,15 @@ public class CombatLogger extends CombatPlugin {
         instance = this;
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            placeholderAPIHook = new PlaceholderAPIHook();
-            placeholderAPIHook.register();
+            try {
+                Class<?> hookClass = Class.forName(
+                        "com.keurig.combatlogger.utils.PlaceholderAPIHook");
+                Object hook = hookClass.getDeclaredConstructor().newInstance();
+                hookClass.getMethod("register").invoke(hook);
+                placeholderAPIHook = hook;
+            } catch (ReflectiveOperationException | LinkageError ex) {
+                getLogger().warning("PlaceholderAPI integration could not be initialized: " + ex.getMessage());
+            }
         }
 
         this.combatPlayer = new CombatPlayer(this);
