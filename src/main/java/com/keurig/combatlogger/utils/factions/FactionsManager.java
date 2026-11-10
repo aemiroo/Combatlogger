@@ -1,7 +1,6 @@
 package com.keurig.combatlogger.utils.factions;
 
 import com.keurig.combatlogger.CombatLogger;
-import com.keurig.combatlogger.listeners.CommandFlightListener;
 import com.keurig.combatlogger.utils.Chat;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -25,7 +24,6 @@ public class FactionsManager {
             Class.forName("com.massivecraft.factions.FPlayers");
             Class.forName("com.massivecraft.factions.cmd.FCmdRoot");
             this.factionsHook = new FactionsUUID();
-            Bukkit.getPluginManager().registerEvents(new CommandFlightListener(), plugin);
             this.factionsEnabled = true;
             Chat.log("Enabled MassiveCraft FactionsUUID support");
         } catch (ReflectiveOperationException | LinkageError | RuntimeException ex) {
