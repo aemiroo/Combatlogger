@@ -46,7 +46,9 @@ public class MoveListener implements Listener {
                 if (isInsideRegion(player.getWorld(), regionName, to)
                         && !isInsideRegion(player.getWorld(), regionName, event.getFrom())) {
                     event.setTo(from);
-                    Chat.message(player, 5, plugin.getConfig().getString("protected-regions.message"));
+                    double messageInterval = plugin.getConfig().getDouble("protected-regions.interval");
+                    Chat.message(player, messageInterval > 0D ? messageInterval : 5D,
+                            plugin.getConfig().getString("protected-regions.message"));
                     return;
                 }
             } catch (ReflectiveOperationException ex) {
