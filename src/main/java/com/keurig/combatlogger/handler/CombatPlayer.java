@@ -247,7 +247,28 @@ public class CombatPlayer {
         }
     }
 
-    private boolean isTagged(Player player) {
+    /**
+     * Cancels every outstanding task and clears transient state during disable.
+     */
+    public void shutdown() {
+        for (Integer taskId : new ArrayList<Integer>(taskActionBar.values())) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
+        for (Integer taskId : new ArrayList<Integer>(taskChat.values())) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
+        for (Integer taskId : new ArrayList<Integer>(taskCombat.values())) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
+
+        taskActionBar.clear();
+        taskChat.clear();
+        taskCombat.clear();
+        combatLogged.clear();
+        players.clear();
+    }
+
+    public boolean isTagged(Player player) {
         return this.combatLogged.containsKey(player.getUniqueId()) && this.combatLogged.get(player.getUniqueId()) > System.currentTimeMillis();
     }
 
