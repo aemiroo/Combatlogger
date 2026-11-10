@@ -7,7 +7,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.event.HandlerList;
 
 import java.util.List;
 
@@ -30,8 +29,8 @@ public class CombatLoggerCommand implements CommandExecutor, TabCompleter {
                 plugin.reloadConfig();
                 plugin.registerConfig();
 
-                HandlerList.unregisterAll(plugin);
-                CombatLogger.getInstance().registerEvents();
+                plugin.unregisterEvents();
+                plugin.registerEvents();
                 plugin.getPunishmentManager().reload();
                 Chat.message(sender, "&eReloaded configuration...");
             } else if (type.equalsIgnoreCase("info")) {
