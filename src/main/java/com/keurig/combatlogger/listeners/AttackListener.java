@@ -1,6 +1,8 @@
 package com.keurig.combatlogger.listeners;
 
 import com.keurig.combatlogger.CombatLogger;
+import com.keurig.combatlogger.handler.CombatPlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -8,43 +10,66 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
+import java.util.List;
+import java.util.UUID;
+
 public class AttackListener implements Listener {
 
-    private final CombatLogger plugin = CombatLogger.getInstance();
+    private final CombatLogger plugin;
+
+    public AttackListener() {
+        this.plugin = CombatLogger.getInstance();
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onHit(EntityDamageByEntityEvent event) {
+        // CombatLogger is strictly player-versus-player. Entity victims (mobs,
+        // animals, NPCs, armor stands, etc.) must never create combat tags.
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
 
-        if (event.getEntity() instanceof Player) {
-            final Player target = (Player) event.getEntity();
-            Player player = null;
+        Player target = (Player) event.getEntity();
+        Player attacker = resolvePlayerAttacker(event.getDamager());
 
+        // Environmental damage, mobs, non-player projectile shooters and other
+        // non-player sources are intentionally ignored.
+        if (attacker == null || !attacker.isOnline() || !target.isOnline()) {
+            return;
+        }
 
-            if (event.getDamager() instanceof Projectile) {
-                if (((Projectile) event.getDamager()).getShooter() instanceof Player) {
-                    player = (Player) ((Projectile) event.getDamager()).getShooter();
-                }
-            } else if (event.getDamager() instanceof Player) {
-                player = (Player) event.getDamager();
-            }
+        // Compare UUIDs rather than object references so self-damage is rejected
+        // even if a server implementation supplies different Player wrappers.
+        UUID attackerId = attacker.getUniqueId();
+        UUID targetId = target.getUniqueId();
+        if (attackerId.equals(targetId)) {
+            return;
+        }
 
-            if (player == null) {
-                return;
-            }
+        List<String> blacklistedWorlds = plugin.getConfig().getStringList("blacklisted-worlds");
+        if (blacklistedWorlds.contains(attacker.getWorld().getName())
+                || blacklistedWorlds.contains(target.getWorld().getName())) {
+            return;
+        }
 
-            if (player == target) {
-                return;
-            }
-
-            for (String world : plugin.getConfig().getStringList("blacklisted-worlds")) {
-                if (player.getWorld().getName().equals(world)) {
-                    return;
-                }
-            }
-
-            this.plugin.getCombatPlayer().addCombat(player);
-            this.plugin.getCombatPlayer().addCombat(target);
+        CombatPlayer combatPlayer = plugin.getCombatPlayer();
+        if (combatPlayer != null) {
+            combatPlayer.addCombat(attacker, target);
         }
     }
 
+    private Player resolvePlayerAttacker(Entity damager) {
+        if (damager instanceof Player) {
+            return (Player) damager;
+        }
+
+        if (damager instanceof Projectile) {
+            Object shooter = ((Projectile) damager).getShooter();
+            if (shooter instanceof Player) {
+                return (Player) shooter;
+            }
+        }
+
+        return null;
+    }
 }
