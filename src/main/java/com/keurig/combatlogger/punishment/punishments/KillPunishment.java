@@ -11,11 +11,11 @@ public class KillPunishment extends Punishment {
 
     @Override
     public void onQuit(String label) {
-        final Player player = getPlayer();
-
-        if (player.hasPermission("combatlogger.admin"))
+        Player player = getPlayer();
+        if (player == null || player.hasPermission("combatlogger.admin")) {
             return;
+        }
 
-        player.setHealth(0);
+        player.setHealth(0D);
     }
 }
