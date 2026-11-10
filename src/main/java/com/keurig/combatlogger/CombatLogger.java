@@ -55,7 +55,11 @@ public class CombatLogger extends CombatPlugin {
         registerEvents();
         registerConfig();
 
-        getCommand("combatlogger").setExecutor(new CombatLoggerCommand());
+        CombatLoggerCommand command = new CombatLoggerCommand();
+        if (getCommand("combatlogger") != null) {
+            getCommand("combatlogger").setExecutor(command);
+            getCommand("combatlogger").setTabCompleter(command);
+        }
 
     }
 
