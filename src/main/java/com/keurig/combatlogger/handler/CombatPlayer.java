@@ -91,13 +91,14 @@ public class CombatPlayer {
 
         String forceGamemode = plugin.getConfig().getString("on-combat.force-gamemode");
 
-        if (isTagged(player)) {
-            stopTasks(player);
-        } else {
-            if (useChat) {
-                assert combatOnChat != null;
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', combatOnChat));
+        boolean alreadyTagged = isTagged(player);
+        // Always cancel old tasks, including when the timestamp has expired but
+        // its delayed cleanup callback has not run yet.
+        stopTasks(player);
 
+        if (!alreadyTagged) {
+            if (useChat && combatOnChat != null) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', combatOnChat));
             }
             PlayerEnterCombatEvent enterCombatEvent = new PlayerEnterCombatEvent(player);
             Bukkit.getPluginManager().callEvent(enterCombatEvent);
@@ -128,7 +129,7 @@ public class CombatPlayer {
             player.setAllowFlight(false);
         }
 
-        if (!intervals.isEmpty()) {
+        if (!intervals.isEmpty() && intervalMessage != null) {
             this.taskChat.put(player.getUniqueId(), Bukkit.getScheduler().scheduleSyncRepeatingTask(this.plugin, () -> {
                 String finalIntervalMessage = intervalMessage;
 
@@ -161,7 +162,7 @@ public class CombatPlayer {
         }
 
 
-        if (useActionBar) {
+        if (useActionBar && combatOnActionBar != null) {
             this.taskActionBar.put(player.getUniqueId(), Bukkit.getScheduler().scheduleSyncRepeatingTask(this.plugin, () -> {
                 if (!player.isOnline() || combatOnActionBar == null) {
                     return;
@@ -213,14 +214,12 @@ public class CombatPlayer {
         stopTasks(player);
 
         // If configured to do so, send an ActionBar message to the player.
-        if (useActionBar) {
-            assert combatOffActionBar != null; // Ensure combatOffActionBar is not null
+        if (useActionBar && combatOffActionBar != null) {
             ActionBar.sendActionBar(player, ChatColor.translateAlternateColorCodes('&', combatOffActionBar));
         }
 
         // If configured to do so, send a chat message to the player.
-        if (useChat) {
-            assert combatOffChat != null; // Ensure combatOffChat is not null
+        if (useChat && combatOffChat != null) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', combatOffChat));
         }
 
