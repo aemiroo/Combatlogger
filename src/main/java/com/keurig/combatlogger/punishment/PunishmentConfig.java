@@ -55,10 +55,15 @@ public class PunishmentConfig {
     }
 
     public Map<Punishment, Map<String, Object>> getPunishmentArgs(Player player) {
+        return getPunishmentArgs(player, getPunishments(player));
+    }
+
+    public Map<Punishment, Map<String, Object>> getPunishmentArgs(
+            Player player, Collection<Punishment> selectedPunishments) {
         Map<Punishment, Map<String, Object>> result =
                 new HashMap<Punishment, Map<String, Object>>();
 
-        for (Punishment punishment : getPunishments(player)) {
+        for (Punishment punishment : selectedPunishments) {
             Map<String, Object> arguments = getDefaultArg(punishment);
             ConfigurationSection permissions = config.getConfigurationSection("permissions");
 
