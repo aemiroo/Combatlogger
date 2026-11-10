@@ -9,11 +9,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class EcoPunishment extends Punishment {
 
-    public static HashMap<UUID, String> joinMessages = new HashMap<>();
+    public static final Map<UUID, String> joinMessages = new HashMap<UUID, String>();
 
     public EcoPunishment() {
         super("ECO", 2);
@@ -21,42 +22,48 @@ public class EcoPunishment extends Punishment {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-
-        // Delay message
-        Bukkit.getScheduler().runTaskLater(CombatPlugin.getInstance(), () -> {
-            if (joinMessages.containsKey(player.getUniqueId())) {
-                Chat.message(player, joinMessages.get(player.getUniqueId()));
-                joinMessages.remove(player.getUniqueId());
+        final Player player = event.getPlayer();
+        Bukkit.getScheduler().runTaskLater(CombatPlugin.getInstance(), new Runnable() {
+            @Override
+            public void run() {
+                String message = joinMessages.remove(player.getUniqueId());
+                if (message != null && player.isOnline()) {
+                    Chat.message(player, message);
+                }
             }
-        }, 5);
+        }, 5L);
     }
 
     @Override
     public void onQuit(String label) {
-
-        if (CombatPlugin.getEconomyAPI() == null) {
+        Player player = getPlayer();
+        if (player == null || CombatPlugin.getEconomyAPI() == null) {
             return;
         }
 
-        String numberStr = getArgs().get("amount").toString();
+        Map<String, Object> arguments = getArgs();
+        if (arguments == null || arguments.get("amount") == null) {
+            return;
+        }
 
-        int amount = 0;
-
+        double amount;
         try {
-            amount = Integer.parseInt(numberStr);
-
-        } catch (NumberFormatException ignored) {
-            Chat.log("Illegal string in eco punishment");
+            amount = Double.parseDouble(String.valueOf(arguments.get("amount")));
+        } catch (NumberFormatException ex) {
+            CombatPlugin.getInstance().getLogger().warning(
+                    "Invalid economy punishment amount: " + arguments.get("amount"));
+            return;
         }
 
-        // deposit money into players account
-        if (amount > 0) {
-            CombatPlugin.depositPlayer(getPlayer(), Math.abs(amount));
-        } else if (amount < 0) { // withdraw money from players account
-            CombatPlugin.withdrawPlayer(getPlayer(), Math.abs(amount));
+        if (amount > 0D) {
+            CombatPlugin.depositPlayer(player, Math.abs(amount));
+        } else if (amount < 0D) {
+            CombatPlugin.withdrawPlayer(player, Math.abs(amount));
         }
 
-        joinMessages.put(getPlayer().getUniqueId(), (String) getArgs().get("message"));
+        Object message = arguments.get("message");
+        if (message != null) {
+            joinMessages.put(player.getUniqueId(), String.valueOf(message));
+        }
     }
 }
