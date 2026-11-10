@@ -86,13 +86,13 @@ public class PunishmentConfig {
 
 
             if (punishmentValues != null) {
-                if (!fieldName.isBlank() && !fieldName.isEmpty()) {
+                if (!fieldName.trim().isEmpty() && !fieldName.isEmpty()) {
                     for (String v : punishmentValues.getKeys(true)) {
                         arguments.put(v, punishmentValues.get(v));
                     }
                 }
             }
-//            if (!fieldName.isBlank() && !fieldName.isEmpty()) {
+//            if (!fieldName.trim().isEmpty() && !fieldName.isEmpty()) {
 //
 //                arguments.put(fieldName.toUpperCase(), type);
 //            }
@@ -183,7 +183,7 @@ public class PunishmentConfig {
                         String fieldName = key;
 
 
-                        if (!fieldName.isBlank() && !fieldName.isEmpty()) {
+                        if (!fieldName.trim().isEmpty() && !fieldName.isEmpty()) {
                             if (permissionAPI != null && permissionAPI.has(player, permission)) {
                                 arguments.put(fieldName, type);
                             } else {
@@ -292,7 +292,7 @@ public class PunishmentConfig {
             }
 
 
-            if (permisison != null && !permisison.isEmpty() && !permisison.isBlank()) {
+            if (permisison != null && !permisison.isEmpty() && !permisison.trim().isEmpty()) {
                 punishmentMap.put(permisison, punishments);
             }
         }
