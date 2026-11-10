@@ -8,6 +8,8 @@ import java.lang.reflect.Method;
 
 public final class ActionBar {
 
+    private static boolean warningLogged;
+
     private ActionBar() {
     }
 
@@ -42,8 +44,7 @@ public final class ActionBar {
             Class<?> packetInterface = Class.forName("net.minecraft.server." + version + ".Packet");
             connection.getClass().getMethod("sendPacket", packetInterface).invoke(connection, packet);
         } catch (ReflectiveOperationException ex) {
-            CombatLogger.getInstance().getLogger().warning(
-                    "Unable to send legacy action bar message: " + ex.getMessage());
+            warnOnce("Unable to send legacy action bar message: " + ex.getMessage());
         }
     }
 
@@ -70,8 +71,14 @@ public final class ActionBar {
 
             throw new NoSuchMethodException("Spigot action-bar sendMessage method was not found");
         } catch (ReflectiveOperationException ex) {
-            CombatLogger.getInstance().getLogger().warning(
-                    "Unable to send action bar message: " + ex.getMessage());
+            warnOnce("Unable to send action bar message: " + ex.getMessage());
+        }
+    }
+
+    private static void warnOnce(String message) {
+        if (!warningLogged) {
+            warningLogged = true;
+            CombatLogger.getInstance().getLogger().warning(message);
         }
     }
 
