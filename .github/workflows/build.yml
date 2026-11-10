@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java 8
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '8'
@@ -26,3 +26,13 @@ jobs:
 
       - name: Build and verify
         run: mvn --batch-mode --no-transfer-progress clean verify
+
+      - name: Verify Java 8 bytecode
+        run: javap -verbose target/classes/com/keurig/combatlogger/CombatLogger.class | grep -q "major version: 52"
+
+      - name: Upload plugin JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: CombatLogger
+          path: target/CombatLogger-2.0.0-SNAPSHOT.jar
+          if-no-files-found: error
