@@ -19,7 +19,8 @@ public class CommandFlightListener implements Listener {
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        if (!CombatLoggerAPI.isTagged(player) || !plugin.isFactionsEnabled()) {
+        if (!CombatLoggerAPI.isTagged(player) || !plugin.isFactionsEnabled()
+                || !plugin.getConfig().getBoolean("on-combat.disable-flight")) {
             return;
         }
 
