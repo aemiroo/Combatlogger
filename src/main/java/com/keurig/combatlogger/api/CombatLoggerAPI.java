@@ -49,7 +49,7 @@ public class CombatLoggerAPI {
     }
 
     /**
-     * Retrieves the remaining time in seconds for a player's combat tag.
+     * Retrieves the remaining time in milliseconds for a player's combat tag.
      *
      * @param player The player to query for remaining combat time.
      * @return The remaining time in milliseconds for the player's combat tag,
