@@ -108,7 +108,7 @@ public class CombatPlayer {
             player.setAllowFlight(false);
         }
 
-        if (forceGamemode != null && !forceGamemode.isBlank()) {
+        if (forceGamemode != null && !forceGamemode.trim().isEmpty()) {
 
             GameMode gameMode = GameMode.valueOf(forceGamemode.toUpperCase(Locale.ROOT));
 
