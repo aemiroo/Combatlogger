@@ -20,6 +20,9 @@ public class CombatLoggerAPI {
                 || CombatLogger.getInstance().getCombatPlayer() == null) {
             return false;
         }
+        if (CombatLogger.getInstance() == null || CombatLogger.getInstance().getCombatPlayer() == null) {
+            return 0L;
+        }
         final Map<UUID, Long> combatLogged = CombatLogger.getInstance().getCombatPlayer().getCombatLogged();
         Long expiresAt = combatLogged.get(player.getUniqueId());
         return expiresAt != null && expiresAt.longValue() > System.currentTimeMillis();
@@ -40,7 +43,7 @@ public class CombatLoggerAPI {
 
         if (tag) {
             combatPlayer.addCombat(player);
-        } else {
+        } else if (isTagged(player)) {
             combatPlayer.removeCombat(player);
         }
     }
