@@ -148,7 +148,7 @@ public class CombatPlayer {
                         Chat.message(player, finalIntervalMessage);
                     }
                 }
-            }, 0, actionBarPeriodTicks));
+            }, 0, 20));
         }
 
 
@@ -167,7 +167,7 @@ public class CombatPlayer {
                         .replace("%combatlogger_timeformatted%", formattedTime)
                         .replace("%combatlogger_time%", String.valueOf(remainingMillis));
                 ActionBar.sendActionBar(player, ChatColor.translateAlternateColorCodes('&', finalCombatOnActionBar));
-            }, 0, 20));
+            }, 0, actionBarPeriodTicks));
         }
 
         // Store the current time in milliseconds when a player enters combat,
