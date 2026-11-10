@@ -20,9 +20,6 @@ public class CombatLoggerAPI {
                 || CombatLogger.getInstance().getCombatPlayer() == null) {
             return false;
         }
-        if (CombatLogger.getInstance() == null || CombatLogger.getInstance().getCombatPlayer() == null) {
-            return 0L;
-        }
         final Map<UUID, Long> combatLogged = CombatLogger.getInstance().getCombatPlayer().getCombatLogged();
         Long expiresAt = combatLogged.get(player.getUniqueId());
         return expiresAt != null && expiresAt.longValue() > System.currentTimeMillis();
@@ -56,7 +53,8 @@ public class CombatLoggerAPI {
      * or 0 if the player is not currently tagged in combat.
      */
     public static long timeRemaining(Player player) {
-        if (player == null) {
+        if (player == null || CombatLogger.getInstance() == null
+                || CombatLogger.getInstance().getCombatPlayer() == null) {
             return 0L;
         }
         final Map<UUID, Long> combatLogged = CombatLogger.getInstance().getCombatPlayer().getCombatLogged();
