@@ -1,8 +1,11 @@
 package com.keurig.combatlogger.punishment.punishments;
 
+import com.keurig.combatlogger.CombatLogger;
 import com.keurig.combatlogger.punishment.Punishment;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import java.util.Map;
 
 public class CommandPunishment extends Punishment {
 
@@ -12,15 +15,20 @@ public class CommandPunishment extends Punishment {
 
     @Override
     public void onQuit(String label) {
-        final Player player = getPlayer();
-
-        String message = getArgs().get("command").toString();
-
-        message = message.replace("%player%", player.getName());
-
-        if (player.hasPermission("combatlogger.admin"))
+        Player player = getPlayer();
+        if (player == null || player.hasPermission("combatlogger.admin")) {
             return;
+        }
 
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message);
+        Map<String, Object> arguments = getArgs();
+        Object configuredCommand = arguments == null ? null : arguments.get("command");
+        if (configuredCommand == null) {
+            CombatLogger.getInstance().getLogger().warning(
+                    "Command punishment was selected but no 'command' argument was configured.");
+            return;
+        }
+
+        String command = String.valueOf(configuredCommand).replace("%player%", player.getName());
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 }
