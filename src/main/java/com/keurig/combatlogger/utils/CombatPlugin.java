@@ -2,6 +2,7 @@ package com.keurig.combatlogger.utils;
 
 import com.keurig.combatlogger.CombatLogger;
 import com.keurig.combatlogger.handler.CombatPlayer;
+import com.keurig.combatlogger.api.CombatLoggerAPI;
 import com.keurig.combatlogger.punishment.PunishmentManager;
 import com.keurig.combatlogger.utils.factions.FactionsHook;
 import com.keurig.combatlogger.utils.factions.FactionsManager;
@@ -129,6 +130,6 @@ public class CombatPlugin extends JavaPlugin {
      */
     @Deprecated
     public boolean isTagged(Player player) {
-        return getCombatPlayer().getCombatLogged().containsKey(player.getUniqueId());
+        return CombatLoggerAPI.isTagged(player);
     }
 }
