@@ -19,7 +19,8 @@ chat:
 actionbar:
   # Whether the plugin will use action bar messages
   use: true
-  interval: 0
+  # Seconds between action bar refreshes (minimum 1)
+  interval: 1
   # Message displayed when a player enters combat in the action bar
   on-message: '&6You are now in &fcombat &7for %combatlogger_timeformatted%!'
   # Message displayed when a player leaves combat in the action bar
