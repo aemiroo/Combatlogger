@@ -18,6 +18,7 @@ public class MoveListener implements Listener {
 
     private final CombatLogger plugin = CombatLogger.getInstance();
     private final Map<String, Object> regionCache = new HashMap<String, Object>();
+    private boolean worldGuardWarningLogged;
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
@@ -49,8 +50,11 @@ public class MoveListener implements Listener {
                     return;
                 }
             } catch (ReflectiveOperationException ex) {
-                plugin.getLogger().warning("WorldGuard region check failed for '" + regionName
-                        + "'. Check that a compatible WorldGuard version is installed.");
+                if (!worldGuardWarningLogged) {
+                    plugin.getLogger().warning("WorldGuard region check failed for '" + regionName
+                            + "'. Check that a compatible WorldGuard version is installed: " + ex.getMessage());
+                    worldGuardWarningLogged = true;
+                }
                 return;
             }
         }
@@ -80,14 +84,15 @@ public class MoveListener implements Listener {
             return false;
         }
 
-        if (region.getClass().getName().startsWith("com.sk89q.worldguard.protection.regions.")) {
-            Class<?> vectorClass = Class.forName("com.sk89q.worldedit.math.BlockVector3");
+        Class<?> vectorClass;
+        try {
+            vectorClass = Class.forName("com.sk89q.worldedit.math.BlockVector3");
             Object vector = vectorClass.getMethod("at", int.class, int.class, int.class)
                     .invoke(null, location.getBlockX(), location.getBlockY(), location.getBlockZ());
             return (Boolean) region.getClass().getMethod("contains", vectorClass).invoke(region, vector);
+        } catch (ClassNotFoundException legacyWorldEdit) {
+            vectorClass = Class.forName("com.sk89q.worldedit.Vector");
         }
-
-        Class<?> vectorClass = Class.forName("com.sk89q.worldedit.Vector");
         Object vector = vectorClass.getConstructor(double.class, double.class, double.class)
                 .newInstance((double) location.getBlockX(), (double) location.getBlockY(),
                         (double) location.getBlockZ());
