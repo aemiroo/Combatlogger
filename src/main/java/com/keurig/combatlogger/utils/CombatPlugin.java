@@ -35,7 +35,7 @@ public class CombatPlugin extends JavaPlugin {
     protected boolean factionsEnabled;
 
     @Getter
-    protected PlaceholderAPIHook placeholderAPIHook;
+    protected Object placeholderAPIHook;
 
     // Kept as Object so Vault remains a truly optional runtime dependency.
     @Getter
