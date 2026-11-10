@@ -81,6 +81,10 @@ public class CombatLogger extends CombatPlugin {
         Bukkit.getPluginManager().registerEvents(new DeathListener(), this);
         Bukkit.getPluginManager().registerEvents(new CommandListener(this), this);
 
+        if (factionsEnabled && factionsHook != null) {
+            Bukkit.getPluginManager().registerEvents(new CommandFlightListener(), this);
+        }
+
         // Check if there are any regions, if not disable section
         List<String> regions = getConfig().getStringList("protected-regions.regions");
         if (!regions.isEmpty()) {
