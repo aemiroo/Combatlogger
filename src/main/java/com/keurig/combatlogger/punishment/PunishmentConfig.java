@@ -1,7 +1,6 @@
 package com.keurig.combatlogger.punishment;
 
 import com.keurig.combatlogger.utils.CombatPlugin;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,7 +15,7 @@ public class PunishmentConfig {
     public static final Map<String, Set<Punishment>> punishmentMap = new HashMap<String, Set<Punishment>>();
     public static final Set<Punishment> defaultPunishments = new HashSet<Punishment>();
     private FileConfiguration config;
-    private final Permission permissionAPI;
+    private final Object permissionAPI;
     private final File file;
 
     public PunishmentConfig(CombatPlugin plugin, File file) {
