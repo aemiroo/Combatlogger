@@ -3,7 +3,6 @@ package com.keurig.combatlogger;
 import com.keurig.combatlogger.command.CombatLoggerCommand;
 import com.keurig.combatlogger.handler.CombatPlayer;
 import com.keurig.combatlogger.listeners.*;
-import com.keurig.combatlogger.punishment.PunishmentConfig;
 import com.keurig.combatlogger.punishment.PunishmentManager;
 import com.keurig.combatlogger.punishment.punishments.EcoPunishment;
 import com.keurig.combatlogger.utils.Chat;
@@ -16,7 +15,6 @@ import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
 
-import java.io.File;
 import java.util.List;
 
 public class CombatLogger extends CombatPlugin {
@@ -79,6 +77,7 @@ public class CombatLogger extends CombatPlugin {
         }
         EcoPunishment.joinMessages.clear();
         Chat.temp.clear();
+        unregisterEvents();
     }
 
     public void registerEvents() {
