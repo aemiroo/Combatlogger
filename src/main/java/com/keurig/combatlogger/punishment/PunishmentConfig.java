@@ -33,7 +33,7 @@ public class PunishmentConfig {
 
         if (permissionAPI != null) {
             for (Map.Entry<String, Set<Punishment>> entry : punishmentMap.entrySet()) {
-                if (permissionAPI.has(player, entry.getKey())) {
+                if (CombatPlugin.hasPermission(player, entry.getKey())) {
                     matchedPermission = true;
                     selected.addAll(entry.getValue());
                 }
@@ -65,7 +65,7 @@ public class PunishmentConfig {
             if (permissions != null && permissionAPI != null) {
                 for (String profile : permissions.getKeys(false)) {
                     String permission = permissions.getString(profile + ".permission");
-                    if (permission == null || !permissionAPI.has(player, permission)) {
+                    if (permission == null || !CombatPlugin.hasPermission(player, permission)) {
                         continue;
                     }
 
