@@ -148,11 +148,13 @@ public class CombatPlayer {
                         Chat.message(player, finalIntervalMessage);
                     }
                 }
-            }, 0, 20));
+            }, 0, actionBarPeriodTicks));
         }
 
 
         if (useActionBar && combatOnActionBar != null) {
+            int actionBarInterval = Math.max(1, plugin.getConfig().getInt("actionbar.interval", 1));
+            long actionBarPeriodTicks = 20L * actionBarInterval;
             this.taskActionBar.put(player.getUniqueId(), Bukkit.getScheduler().scheduleSyncRepeatingTask(this.plugin, () -> {
                 if (!player.isOnline() || combatOnActionBar == null) {
                     return;
