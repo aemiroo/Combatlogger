@@ -93,7 +93,7 @@ public class CombatLogger extends CombatPlugin {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             try {
                 Class<?> placeholderApi = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
-                return (String) placeholderApi.getMethod("setPlaceholders", Player.class, String.class)
+                return (String) placeholderApi.getMethod("setPlaceholders", org.bukkit.OfflinePlayer.class, String.class)
                         .invoke(null, player, message);
             } catch (ReflectiveOperationException ex) {
                 getLogger().warning("PlaceholderAPI is enabled but could not be called: " + ex.getMessage());
