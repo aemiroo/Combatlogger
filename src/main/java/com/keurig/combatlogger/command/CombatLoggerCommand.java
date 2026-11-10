@@ -8,8 +8,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -60,9 +58,8 @@ public class CombatLoggerCommand implements CommandExecutor, TabCompleter {
         return false;
     }
 
-    @Nullable
-    @Override
+        @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        return List.of("info", "reload");
+        return java.util.Arrays.asList("info", "reload");
     }
 }
