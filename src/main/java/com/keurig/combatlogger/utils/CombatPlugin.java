@@ -65,7 +65,7 @@ public class CombatPlugin extends JavaPlugin {
             RegisteredServiceProvider<?> registration =
                     getServer().getServicesManager().getRegistration(serviceClass);
             return registration == null ? null : registration.getProvider();
-        } catch (ReflectiveOperationException | LinkageError ex) {
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException ex) {
             getLogger().warning("Vault service unavailable (" + serviceClassName + "): " + ex.getMessage());
             return null;
         }
@@ -98,7 +98,7 @@ public class CombatPlugin extends JavaPlugin {
                     return true;
                 }
             }
-        } catch (ReflectiveOperationException ex) {
+        } catch (ReflectiveOperationException | RuntimeException ex) {
             getInstance().getLogger().warning("Vault economy operation failed: " + ex.getMessage());
         }
         return false;
