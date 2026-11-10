@@ -87,6 +87,9 @@ public class CombatLogger extends CombatPlugin {
     }
 
     public String replaceMsg(Player player, String message) {
+        if (message == null) {
+            return null;
+        }
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             try {
                 Class<?> placeholderApi = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
