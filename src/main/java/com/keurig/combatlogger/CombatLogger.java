@@ -11,11 +11,17 @@ import com.keurig.combatlogger.utils.CombatPlugin;
 import com.keurig.combatlogger.utils.factions.FactionsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+
+import java.util.ArrayList;
 
 import java.io.File;
 import java.util.List;
 
 public class CombatLogger extends CombatPlugin {
+
+    private final List<Listener> registeredListeners = new ArrayList<Listener>();
 
     @Override
     public void onEnable() {
@@ -76,24 +82,38 @@ public class CombatLogger extends CombatPlugin {
     }
 
     public void registerEvents() {
-        Bukkit.getPluginManager().registerEvents(new AttackListener(), this);
-        Bukkit.getPluginManager().registerEvents(new JoinListener(), this);
-        Bukkit.getPluginManager().registerEvents(new DeathListener(), this);
-        Bukkit.getPluginManager().registerEvents(new CommandListener(this), this);
+        unregisterEvents();
+
+        registerListener(new AttackListener());
+        registerListener(new JoinListener());
+        registerListener(new DeathListener());
+        registerListener(new CommandListener(this));
 
         if (factionsEnabled && factionsHook != null) {
-            Bukkit.getPluginManager().registerEvents(new CommandFlightListener(), this);
+            registerListener(new CommandFlightListener());
         }
 
         // Check if there are any regions, if not disable section
         List<String> regions = getConfig().getStringList("protected-regions.regions");
         if (!regions.isEmpty()) {
             if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
-                Bukkit.getPluginManager().registerEvents(new MoveListener(), this);
+                registerListener(new MoveListener());
             } else {
                 getLogger().warning("Protected regions are configured, but WorldGuard is not installed. Region movement restrictions are disabled.");
             }
         }
+    }
+
+    private void registerListener(Listener listener) {
+        Bukkit.getPluginManager().registerEvents(listener, this);
+        registeredListeners.add(listener);
+    }
+
+    public void unregisterEvents() {
+        for (Listener listener : new ArrayList<Listener>(registeredListeners)) {
+            HandlerList.unregisterAll(listener);
+        }
+        registeredListeners.clear();
     }
 
     public void registerConfig() {
