@@ -2,6 +2,7 @@ package com.keurig.combatlogger.listeners;
 
 import com.keurig.combatlogger.CombatLogger;
 import com.keurig.combatlogger.handler.CombatPlayer;
+import com.keurig.combatlogger.api.CombatLoggerAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,7 +19,7 @@ public class DeathListener implements Listener {
 
         // A death ends the victim's combat state regardless of whether the
         // final damage came from another player, a mob, or the environment.
-        if (combatPlayer != null && combatPlayer.isTagged(player)) {
+        if (combatPlayer != null && CombatLoggerAPI.isTagged(player)) {
             combatPlayer.removeCombat(player);
         } else if (combatPlayer != null) {
             combatPlayer.removePlayer(player);
