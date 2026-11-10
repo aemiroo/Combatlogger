@@ -26,7 +26,7 @@ public final class ActionBar {
                         "net.minecraft.server." + nmsVersion + ".PacketPlayOutChat");
                 Constructor<?> packetConstructor = packetClass.getConstructor(componentClass, Byte.TYPE);
 
-                String json = "{\\"text\\":\\"" + escapeJson(message) + "\\"}";
+                String json = "{\"text\":\"" + escapeJson(message) + "\"}";
                 Object component = componentClass.getDeclaredClasses()[0]
                         .getMethod("a", String.class).invoke(null, json);
                 Object packet = packetConstructor.newInstance(component, (byte) 2);
@@ -46,10 +46,10 @@ public final class ActionBar {
     }
 
     private static String escapeJson(String value) {
-        return value.replace("\\\\", "\\\\\\\\")
-                .replace("\\\"", "\\\\\"")
-                .replace("\\n", "\\\\n")
-                .replace("\\r", "\\\\r")
-                .replace("\\t", "\\\\t");
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }
