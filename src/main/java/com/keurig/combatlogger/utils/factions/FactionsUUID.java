@@ -3,7 +3,6 @@ package com.keurig.combatlogger.utils.factions;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,8 +56,7 @@ public class FactionsUUID implements FactionsHook {
             Field flyField = rootClass.getField("cmdFly");
             Object flyCommand = flyField.get(root);
             Field aliasesField = flyCommand.getClass().getField("aliases");
-            Object aliases = aliasesField.get(flyCommand);
-            return aliases instanceof List ? new ArrayList<>((List<String>) aliases) : Collections.<String>emptyList();
+            return copyAliases(aliasesField.get(flyCommand));
         } catch (ReflectiveOperationException ex) {
             return Collections.emptyList();
         }
@@ -68,10 +66,23 @@ public class FactionsUUID implements FactionsHook {
         try {
             Class<?> rootClass = Class.forName("com.massivecraft.factions.cmd.FCmdRoot");
             Object root = rootClass.getMethod("getInstance").invoke(null);
-            Object aliases = rootClass.getField(fieldName).get(root);
-            return aliases instanceof List ? new ArrayList<>((List<String>) aliases) : Collections.<String>emptyList();
+            return copyAliases(rootClass.getField(fieldName).get(root));
         } catch (ReflectiveOperationException ex) {
             return Collections.emptyList();
         }
+    }
+
+    private List<String> copyAliases(Object aliases) {
+        if (!(aliases instanceof Iterable)) {
+            return Collections.emptyList();
+        }
+
+        List<String> result = new ArrayList<String>();
+        for (Object alias : (Iterable<?>) aliases) {
+            if (alias != null) {
+                result.add(String.valueOf(alias));
+            }
+        }
+        return result;
     }
 }
