@@ -20,7 +20,7 @@ public class CombatLoggerCommand implements CommandExecutor, TabCompleter {
 
         if (!sender.hasPermission("combatlogger.command") && !sender.isOp()) {
             Chat.message(sender, "&cYou do not have permission to use this command.");
-            return false;
+            return true;
         }
 
         if (args.length > 0) {
