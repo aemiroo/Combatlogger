@@ -170,7 +170,7 @@ public class CombatPlayer {
                         .replace("%combatlogger_timeformatted%", formattedTime)
                         .replace("%combatlogger_time%", String.valueOf(remainingMillis));
                 ActionBar.sendActionBar(player, ChatColor.translateAlternateColorCodes('&', finalCombatOnActionBar));
-            }, 0, 1));
+            }, 0, 20));
         }
 
         // Store the current time in milliseconds when a player enters combat,
