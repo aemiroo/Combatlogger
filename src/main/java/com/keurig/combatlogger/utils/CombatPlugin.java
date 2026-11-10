@@ -6,17 +6,13 @@ import com.keurig.combatlogger.punishment.PunishmentManager;
 import com.keurig.combatlogger.utils.factions.FactionsHook;
 import com.keurig.combatlogger.utils.factions.FactionsManager;
 import lombok.Getter;
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.lang.reflect.Method;
 
 public class CombatPlugin extends JavaPlugin {
 
-    /**
-     * Get the instance of the CombatLogger main class.
-     */
     @Getter
     protected static CombatLogger instance;
 
@@ -40,47 +36,99 @@ public class CombatPlugin extends JavaPlugin {
     @Getter
     protected PlaceholderAPIHook placeholderAPIHook;
 
+    // Kept as Object so Vault remains a truly optional runtime dependency.
     @Getter
-    protected static Economy economyAPI = null;
+    protected static Object economyAPI;
 
     @Getter
-    protected Permission permissionAPI = null;
+    protected Object permissionAPI;
 
     protected boolean setupEconomy() {
-
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        try {
-            RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-            if (rsp == null || rsp.getProvider() == null) {
-                economyAPI = null;
-                return false;
-            }
-            economyAPI = rsp.getProvider();
-        } catch (NoClassDefFoundError ex) {
-            economyAPI = null;
-            return false;
-        }
-        return true;
+        economyAPI = getVaultProvider("net.milkbowl.vault.economy.Economy");
+        return economyAPI != null;
     }
 
     protected boolean setupPermissions() {
-
-        try {
-            RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-            permissionAPI = rsp == null ? null : rsp.getProvider();
-        } catch (NoClassDefFoundError e) {
-            return false;
-        }
+        permissionAPI = getVaultProvider("net.milkbowl.vault.permission.Permission");
         return permissionAPI != null;
     }
 
+    private Object getVaultProvider(String serviceClassName) {
+        if (!getServer().getPluginManager().isPluginEnabled("Vault")) {
+            return null;
+        }
+
+        try {
+            Class<?> serviceClass = Class.forName(serviceClassName);
+            Object registration = getServer().getServicesManager().getClass()
+                    .getMethod("getRegistration", Class.class)
+                    .invoke(getServer().getServicesManager(), serviceClass);
+            return registration == null ? null : registration.getClass().getMethod("getProvider")
+                    .invoke(registration);
+        } catch (ReflectiveOperationException | LinkageError ex) {
+            getLogger().warning("Vault service unavailable (" + serviceClassName + "): " + ex.getMessage());
+            return null;
+        }
+    }
+
+    public static boolean depositPlayer(Player player, double amount) {
+        return invokeEconomy("depositPlayer", player, amount);
+    }
+
+    public static boolean withdrawPlayer(Player player, double amount) {
+        return invokeEconomy("withdrawPlayer", player, amount);
+    }
+
+    private static boolean invokeEconomy(String methodName, Player player, double amount) {
+        if (economyAPI == null || player == null) {
+            return false;
+        }
+
+        try {
+            for (Method method : economyAPI.getClass().getMethods()) {
+                if (methodName.equals(method.getName())
+                        && method.getParameterTypes().length == 2
+                        && method.getParameterTypes()[0].isAssignableFrom(player.getClass())
+                        && (method.getParameterTypes()[1] == double.class
+                        || method.getParameterTypes()[1] == Double.class)) {
+                    Object response = method.invoke(economyAPI, player, amount);
+                    if (response != null && response.getClass().getMethod("transactionSuccess").isAccessible()) {
+                        return (Boolean) response.getClass().getMethod("transactionSuccess").invoke(response);
+                    }
+                    return true;
+                }
+            }
+        } catch (ReflectiveOperationException ex) {
+            getInstance().getLogger().warning("Vault economy operation failed: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    public static boolean hasPermission(Player player, String permission) {
+        Object provider = getInstance() == null ? null : getInstance().getPermissionAPI();
+        if (provider == null || player == null || permission == null) {
+            return false;
+        }
+
+        try {
+            for (Method method : provider.getClass().getMethods()) {
+                if ("has".equals(method.getName())
+                        && method.getParameterTypes().length == 2
+                        && method.getParameterTypes()[0].isAssignableFrom(player.getClass())
+                        && method.getParameterTypes()[1] == String.class) {
+                    return (Boolean) method.invoke(provider, player, permission);
+                }
+            }
+        } catch (ReflectiveOperationException ex) {
+            getInstance().getLogger().warning("Vault permission check failed: " + ex.getMessage());
+        }
+        return false;
+    }
+
     /**
-     * @param player get the player tagged check.
-     * @return true if user is tagged else false
-     * @deprecated moved api to CombatLoggerAPI.isTagged(Player)
+     * @deprecated use CombatLoggerAPI.isTagged(Player).
      */
+    @Deprecated
     public boolean isTagged(Player player) {
         return getCombatPlayer().getCombatLogged().containsKey(player.getUniqueId());
     }
