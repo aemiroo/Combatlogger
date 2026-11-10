@@ -104,11 +104,6 @@ public class CombatPlayer {
             Bukkit.getPluginManager().callEvent(enterCombatEvent);
         }
 
-        if (!this.plugin.isFactionsEnabled()) {
-            player.setFlying(false);
-            player.setAllowFlight(false);
-        }
-
         if (forceGamemode != null && !forceGamemode.trim().isEmpty()) {
             try {
                 GameMode gameMode = GameMode.valueOf(forceGamemode.trim().toUpperCase(Locale.ROOT));
@@ -127,6 +122,15 @@ public class CombatPlayer {
         if (disableFlight) {
             player.setFlying(false);
             player.setAllowFlight(false);
+
+            if (this.plugin.isFactionsEnabled() && CombatLogger.getFactionsHook() != null) {
+                try {
+                    CombatLogger.getFactionsHook().disableFlight(player);
+                } catch (RuntimeException ex) {
+                    plugin.getLogger().warning("Unable to disable Factions flight for "
+                            + player.getName() + ": " + ex.getMessage());
+                }
+            }
         }
 
         if (!intervals.isEmpty() && intervalMessage != null) {
