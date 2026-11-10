@@ -58,8 +58,23 @@ public class CombatPlayer {
     }
 
 
+    /**
+     * Starts or refreshes combat for a verified player-versus-player hit.
+     * Keeping the pair validation here prevents listeners from accidentally
+     * tagging a player for damage caused by a non-player or by themselves.
+     */
+    public void addCombat(Player player, Player opponent) {
+        if (player == null || opponent == null
+                || player.getUniqueId().equals(opponent.getUniqueId())) {
+            return;
+        }
+
+        addCombat(player);
+        addCombat(opponent);
+    }
+
     public void addCombat(Player player) {
-        if (player.hasPermission("combatlogger.admin"))
+        if (player == null || !player.isOnline() || player.hasPermission("combatlogger.admin"))
             return;
 
         final int combatTimer = this.plugin.getConfig().getInt("combat-timer");
