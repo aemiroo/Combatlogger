@@ -3,36 +3,31 @@ package com.keurig.combatlogger.utils;
 import org.bukkit.Bukkit;
 
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
+/**
+ * Main-thread TTL map backed by Bukkit's scheduler. Replacing an entry resets
+ * its expiry without allowing an older scheduled callback to remove it.
+ */
 public class TempHashMap<K, V> extends HashMap<K, V> {
-    private final long ttl; // Time-to-live for entries in milliseconds
+
+    private final long ttlMillis;
 
     public TempHashMap(long ttl) {
-        this.ttl = ttl;
+        this.ttlMillis = Math.max(1L, ttl);
     }
 
-    // Override put method to schedule removal after ttl
     @Override
-    public V put(K key, V value) {
+    public V put(final K key, final V value) {
         V oldValue = super.put(key, value);
-        scheduleRemoval(key);
-        return oldValue;
-    }
-
-    // Schedule removal of key after ttl
-    private void scheduleRemoval(final K key) {
-        Bukkit.getScheduler().runTaskLater(CombatPlugin.getInstance(), () -> {
-            remove(key);
-        }, ttl);
-
-        new Timer().schedule(new TimerTask() {
+        long ticks = Math.max(1L, (ttlMillis + 49L) / 50L);
+        Bukkit.getScheduler().runTaskLater(CombatPlugin.getInstance(), new Runnable() {
             @Override
             public void run() {
-                remove(key);
+                if (TempHashMap.super.get(key) == value) {
+                    TempHashMap.super.remove(key);
+                }
             }
-        }, ttl);
+        }, ticks);
+        return oldValue;
     }
-
 }
