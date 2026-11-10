@@ -52,9 +52,9 @@ public class EcoPunishment extends Punishment {
 
         // deposit money into players account
         if (amount > 0) {
-            CombatPlugin.getEconomyAPI().depositPlayer(getPlayer(), Math.abs(amount));
+            CombatPlugin.depositPlayer(getPlayer(), Math.abs(amount));
         } else if (amount < 0) { // withdraw money from players account
-            CombatPlugin.getEconomyAPI().withdrawPlayer(getPlayer(), Math.abs(amount));
+            CombatPlugin.withdrawPlayer(getPlayer(), Math.abs(amount));
         }
 
         joinMessages.put(getPlayer().getUniqueId(), (String) getArgs().get("message"));
