@@ -109,14 +109,18 @@ public class CombatPlayer {
         }
 
         if (forceGamemode != null && !forceGamemode.trim().isEmpty()) {
-
-            GameMode gameMode = GameMode.valueOf(forceGamemode.toUpperCase(Locale.ROOT));
-
-            if (!player.getGameMode().equals(gameMode)) {
-                player.setGameMode(gameMode);
-                Chat.message(player, plugin.getConfig().getString("on-combat.force-gamemode-message"));
+            try {
+                GameMode gameMode = GameMode.valueOf(forceGamemode.trim().toUpperCase(Locale.ROOT));
+                if (!player.getGameMode().equals(gameMode)) {
+                    player.setGameMode(gameMode);
+                    String message = plugin.getConfig().getString("on-combat.force-gamemode-message");
+                    if (message != null) {
+                        Chat.message(player, message);
+                    }
+                }
+            } catch (IllegalArgumentException ex) {
+                plugin.getLogger().warning("Invalid on-combat.force-gamemode value: " + forceGamemode);
             }
-
         }
 
         if (disableFlight) {
