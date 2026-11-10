@@ -51,7 +51,7 @@ public class CombatLoggerCommand implements CommandExecutor, TabCompleter {
             Chat.message(sender, "&cInvalid arguments. Usage: /combatlogger [reload | info]");
         }
 
-        return false;
+        return true;
     }
 
     @Override
