@@ -14,7 +14,6 @@ import java.util.UUID;
 
 public class BanPunishment extends Punishment {
 
-
     public BanPunishment() {
         super("BAN", 2);
     }
@@ -22,56 +21,57 @@ public class BanPunishment extends Punishment {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
-        Chat.log("PLayer tried joining");
-
         BanInfo banInfo = BanInfo.get(player.getUniqueId());
         if (banInfo == null) {
             return;
         }
 
         if (banInfo.isBanned()) {
-            event.setJoinMessage(Chat.color(banInfo.getMessage()));
-            player.kickPlayer(Chat.color(banInfo.getMessage()));
+            String message = banInfo.getMessage();
+            if (message != null) {
+                event.setJoinMessage(Chat.color(message));
+                player.kickPlayer(Chat.color(message));
+            }
         }
-
-//        if (banned.containsKey(player.getUniqueId()) && banned.get(player.getUniqueId()) > System.currentTimeMillis()) {
-//            String message = args[1];
-//            message = message.replace("%combatlogger_timeformatted%", Chat.timeFormat(this.banned.get(player.getUniqueId()) - System.currentTimeMillis(), true));
-//            message = message.replace("{timeRemaining}", Chat.timeFormat(this.banned.get(player.getUniqueId()) - System.currentTimeMillis(), true));
-//            message = CombatLogger.getInstance().replaceMsg(player, message);
-//            player.kickPlayer(Chat.color(message));
-//        }
     }
 
     @Override
     public void onQuit(String label) {
-        final Player player = getPlayer();
-
-        if (player.hasPermission("combatlogger.admin"))
+        Player player = getPlayer();
+        if (player == null || player.hasPermission("combatlogger.admin")) {
             return;
+        }
 
-        String message = getArgs().get("message").toString();
-        String seconds = getArgs().get("seconds").toString();
+        Map<String, Object> arguments = getArgs();
+        if (arguments == null || arguments.get("message") == null || arguments.get("seconds") == null) {
+            CombatLogger.getInstance().getLogger().warning("Ban punishment requires both 'message' and 'seconds'.");
+            return;
+        }
 
-        BanInfo.create(player.getUniqueId(), message, System.currentTimeMillis() + (Integer.parseInt(seconds) * 1000));
-
+        try {
+            int seconds = Integer.parseInt(String.valueOf(arguments.get("seconds")));
+            if (seconds <= 0) {
+                return;
+            }
+            BanInfo.create(player.getUniqueId(), String.valueOf(arguments.get("message")),
+                    System.currentTimeMillis() + (seconds * 1000L));
+        } catch (NumberFormatException ex) {
+            CombatLogger.getInstance().getLogger().warning("Invalid ban punishment duration: " + arguments.get("seconds"));
+        }
     }
 }
-
 
 class BanInfo {
     private final UUID uuid;
     private final String message;
-    private final Long time;
+    private final long time;
 
-    private static final Map<UUID, BanInfo> banned = new HashMap<>();
+    private static final Map<UUID, BanInfo> banned = new HashMap<UUID, BanInfo>();
 
-    private BanInfo(UUID uuid, String message, Long time) {
+    private BanInfo(UUID uuid, String message, long time) {
         this.uuid = uuid;
         this.message = message;
         this.time = time;
-
         banned.put(uuid, this);
     }
 
@@ -81,23 +81,27 @@ class BanInfo {
 
     public String getMessage() {
         Player player = Bukkit.getPlayer(uuid);
-
-        if (player != null) {
-            String msg = message;
-            msg = msg.replace("%combatlogger_timeformatted%", Chat.timeFormat(time - System.currentTimeMillis(), true));
-            msg = msg.replace("{timeRemaining}", Chat.timeFormat(time - System.currentTimeMillis(), true));
-            msg = CombatLogger.getInstance().replaceMsg(player, msg);
-            return msg;
+        if (player == null) {
+            return message;
         }
 
-        return null;
+        String formatted = message.replace("%combatlogger_timeformatted%",
+                Chat.timeFormat(time - System.currentTimeMillis(), true));
+        formatted = formatted.replace("{timeRemaining}",
+                Chat.timeFormat(time - System.currentTimeMillis(), true));
+        return CombatLogger.getInstance().replaceMsg(player, formatted);
     }
 
-    public static BanInfo create(UUID uuid, String message, Long time) {
+    public static BanInfo create(UUID uuid, String message, long time) {
         return new BanInfo(uuid, message, time);
     }
 
     public static BanInfo get(UUID uuid) {
-        return banned.get(uuid);
+        BanInfo info = banned.get(uuid);
+        if (info != null && !info.isBanned()) {
+            banned.remove(uuid);
+            return null;
+        }
+        return info;
     }
 }
