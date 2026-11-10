@@ -68,6 +68,7 @@ public class CombatLogger extends CombatPlugin {
             this.combatPlayer.shutdown();
         }
         EcoPunishment.joinMessages.clear();
+        Chat.temp.clear();
     }
 
     public void registerEvents() {
