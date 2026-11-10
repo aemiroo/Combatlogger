@@ -29,13 +29,17 @@ public class TempHashMap<K, V> extends HashMap<K, V> {
         Bukkit.getScheduler().runTaskLater(CombatPlugin.getInstance(), new Runnable() {
             @Override
             public void run() {
-                if (generations.get(key) == generation) {
-                    generations.remove(key);
-                    TempHashMap.super.remove(key);
-                }
+                TempHashMap.this.removeExpired(key, generation);
             }
         }, ticks);
         return oldValue;
+    }
+
+    private void removeExpired(K key, Object generation) {
+        if (generations.get(key) == generation) {
+            generations.remove(key);
+            super.remove(key);
+        }
     }
 
     @Override
