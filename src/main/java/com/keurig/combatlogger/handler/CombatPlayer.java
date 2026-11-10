@@ -176,7 +176,7 @@ public class CombatPlayer {
 
         // Store the current time in milliseconds when a player enters combat,
         // along with the time when they will leave combat based on the combatTimer.
-        this.combatLogged.put(player.getUniqueId(), System.currentTimeMillis() + (combatTimer * 1000));
+        this.combatLogged.put(player.getUniqueId(), System.currentTimeMillis() + (combatTimer * 1000L));
 
         // Schedule a task to run after 'combatTimer' seconds to check if the player
         // is still in combat.
