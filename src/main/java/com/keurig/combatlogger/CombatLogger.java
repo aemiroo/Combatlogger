@@ -129,7 +129,7 @@ public class CombatLogger extends CombatPlugin {
                 Class<?> placeholderApi = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
                 return (String) placeholderApi.getMethod("setPlaceholders", org.bukkit.OfflinePlayer.class, String.class)
                         .invoke(null, player, message);
-            } catch (ReflectiveOperationException ex) {
+            } catch (ReflectiveOperationException | LinkageError ex) {
                 getLogger().warning("PlaceholderAPI is enabled but could not be called: " + ex.getMessage());
             }
         }
