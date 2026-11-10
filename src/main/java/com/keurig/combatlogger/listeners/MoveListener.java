@@ -10,12 +10,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MoveListener implements Listener {
 
     private final CombatLogger plugin = CombatLogger.getInstance();
+    private final Map<String, Object> regionCache = new HashMap<String, Object>();
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
@@ -30,7 +32,7 @@ public class MoveListener implements Listener {
         }
 
         Location from = event.getFrom().clone();
-        // Permit looking around and falling, while preventing horizontal movement.
+        // Preserve normal movement; only the configured protected-region boundary is restricted.
         from.setYaw(to.getYaw());
         from.setPitch(to.getPitch());
         if (to.getY() < from.getY()) {
@@ -62,17 +64,27 @@ public class MoveListener implements Listener {
      */
     private boolean isInsideRegion(World world, String regionName, Location location)
             throws ReflectiveOperationException {
-        Object region = getWorldGuard7Region(world, regionName);
-        if (region != null) {
+        String cacheKey = world.getName() + ":" + regionName.toLowerCase(java.util.Locale.ROOT);
+        Object region;
+        if (regionCache.containsKey(cacheKey)) {
+            region = regionCache.get(cacheKey);
+        } else {
+            region = getWorldGuard7Region(world, regionName);
+            if (region == null) {
+                region = getWorldGuard6Region(world, regionName);
+            }
+            regionCache.put(cacheKey, region);
+        }
+
+        if (region == null) {
+            return false;
+        }
+
+        if (region.getClass().getName().startsWith("com.sk89q.worldguard.protection.regions.")) {
             Class<?> vectorClass = Class.forName("com.sk89q.worldedit.math.BlockVector3");
             Object vector = vectorClass.getMethod("at", int.class, int.class, int.class)
                     .invoke(null, location.getBlockX(), location.getBlockY(), location.getBlockZ());
             return (Boolean) region.getClass().getMethod("contains", vectorClass).invoke(region, vector);
-        }
-
-        region = getWorldGuard6Region(world, regionName);
-        if (region == null) {
-            return false;
         }
 
         Class<?> vectorClass = Class.forName("com.sk89q.worldedit.Vector");
