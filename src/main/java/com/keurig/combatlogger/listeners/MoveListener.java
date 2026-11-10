@@ -53,7 +53,6 @@ public class MoveListener implements Listener {
             }
         }
 
-        event.setTo(from);
     }
 
     /**
@@ -76,7 +75,7 @@ public class MoveListener implements Listener {
             return false;
         }
 
-        Class<?> vectorClass = Class.forName("com.sk89q.worldedit.BlockVector");
+        Class<?> vectorClass = Class.forName("com.sk89q.worldedit.Vector");
         Object vector = vectorClass.getConstructor(double.class, double.class, double.class)
                 .newInstance((double) location.getBlockX(), (double) location.getBlockY(),
                         (double) location.getBlockZ());
