@@ -7,6 +7,7 @@ import com.keurig.combatlogger.utils.factions.FactionsHook;
 import com.keurig.combatlogger.utils.factions.FactionsManager;
 import lombok.Getter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Method;
@@ -60,11 +61,9 @@ public class CombatPlugin extends JavaPlugin {
 
         try {
             Class<?> serviceClass = Class.forName(serviceClassName);
-            Object registration = getServer().getServicesManager().getClass()
-                    .getMethod("getRegistration", Class.class)
-                    .invoke(getServer().getServicesManager(), serviceClass);
-            return registration == null ? null : registration.getClass().getMethod("getProvider")
-                    .invoke(registration);
+            RegisteredServiceProvider<?> registration =
+                    getServer().getServicesManager().getRegistration(serviceClass);
+            return registration == null ? null : registration.getProvider();
         } catch (ReflectiveOperationException | LinkageError ex) {
             getLogger().warning("Vault service unavailable (" + serviceClassName + "): " + ex.getMessage());
             return null;
