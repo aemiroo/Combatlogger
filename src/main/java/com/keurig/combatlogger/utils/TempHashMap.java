@@ -23,8 +23,8 @@ public class TempHashMap<K, V> extends HashMap<K, V> {
         Bukkit.getScheduler().runTaskLater(CombatPlugin.getInstance(), new Runnable() {
             @Override
             public void run() {
-                if (TempHashMap.super.get(key) == value) {
-                    TempHashMap.super.remove(key);
+                if (TempHashMap.this.get(key) == value) {
+                    TempHashMap.this.remove(key);
                 }
             }
         }, ticks);
