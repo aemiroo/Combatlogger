@@ -10,7 +10,6 @@ import com.keurig.combatlogger.utils.Chat;
 import com.keurig.combatlogger.utils.CombatPlugin;
 import com.keurig.combatlogger.utils.PlaceholderAPIHook;
 import com.keurig.combatlogger.utils.factions.FactionsManager;
-import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -24,7 +23,7 @@ public class CombatLogger extends CombatPlugin {
         super.onEnable();
         instance = this;
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             placeholderAPIHook = new PlaceholderAPIHook();
             placeholderAPIHook.register();
         }
@@ -52,13 +51,16 @@ public class CombatLogger extends CombatPlugin {
 
         getCommand("combatlogger").setExecutor(new CombatLoggerCommand());
 
-
-        PunishmentConfig punishmentConfig = new PunishmentConfig(this, new File(getDataFolder(), "punishments.yml"));
     }
 
     @Override
     public void onDisable() {
-        this.punishmentManager.unregisterPunishments();
+        if (this.punishmentManager != null) {
+            this.punishmentManager.unregisterPunishments();
+        }
+        if (this.combatPlayer != null) {
+            this.combatPlayer.shutdown();
+        }
         EcoPunishment.joinMessages.clear();
     }
 
@@ -71,7 +73,11 @@ public class CombatLogger extends CombatPlugin {
         // Check if there are any regions, if not disable section
         List<String> regions = getConfig().getStringList("protected-regions.regions");
         if (!regions.isEmpty()) {
-            Bukkit.getPluginManager().registerEvents(new MoveListener(), this);
+            if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+                Bukkit.getPluginManager().registerEvents(new MoveListener(), this);
+            } else {
+                getLogger().warning("Protected regions are configured, but WorldGuard is not installed. Region movement restrictions are disabled.");
+            }
         }
     }
 
@@ -82,7 +88,13 @@ public class CombatLogger extends CombatPlugin {
 
     public String replaceMsg(Player player, String message) {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            return PlaceholderAPI.setPlaceholders(player, message);
+            try {
+                Class<?> placeholderApi = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+                return (String) placeholderApi.getMethod("setPlaceholders", Player.class, String.class)
+                        .invoke(null, player, message);
+            } catch (ReflectiveOperationException ex) {
+                getLogger().warning("PlaceholderAPI is enabled but could not be called: " + ex.getMessage());
+            }
         }
 
         return message;
