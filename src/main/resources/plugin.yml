@@ -3,8 +3,8 @@ version: '${project.version}'
 main: com.keurig.combatlogger.CombatLogger
 authors: [ Keurig ]
 description: A simple combat logger plugin!
-api-version: 1.13
 softdepend:
+  - Vault
   - Factions
   - PlaceholderAPI
   - WorldGuard
