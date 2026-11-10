@@ -21,8 +21,6 @@ public class DeathListener implements Listener {
         // final damage came from another player, a mob, or the environment.
         if (combatPlayer != null && CombatLoggerAPI.isTagged(player)) {
             combatPlayer.removeCombat(player);
-        } else if (combatPlayer != null) {
-            combatPlayer.removePlayer(player);
         }
     }
 }
