@@ -62,15 +62,31 @@ public class PunishmentManager {
         config.reloadConfig();
     }
 
-    public void onQuit(Player player) {
+    public synchronized void onQuit(Player player) {
+        if (player == null) {
+            return;
+        }
+
         Set<Punishment> selectedPunishments = config.getPunishments(player);
         Map<Punishment, Map<String, Object>> arguments =
                 config.getPunishmentArgs(player, selectedPunishments);
+
         for (Punishment punishment : selectedPunishments) {
             punishment.setArgs(arguments.get(punishment));
             punishment.setPlayer(player);
             punishment.setPunishmentConfig(config);
-            punishment.onQuit(punishment.getName());
+            try {
+                punishment.onQuit(punishment.getName());
+            } catch (RuntimeException ex) {
+                plugin.getLogger().severe("Punishment '" + punishment.getName()
+                        + "' failed for " + player.getName() + ": " + ex.getMessage());
+            } finally {
+                // Punishments are shared instances; never retain a quitting
+                // Player reference or per-player arguments after execution.
+                punishment.setPlayer(null);
+                punishment.setArgs(Collections.<String, Object>emptyMap());
+                punishment.setPunishmentConfig(null);
+            }
         }
     }
 
