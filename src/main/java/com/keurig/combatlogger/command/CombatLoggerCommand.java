@@ -29,7 +29,6 @@ public class CombatLoggerCommand implements CommandExecutor, TabCompleter {
                 plugin.reloadConfig();
                 plugin.registerConfig();
 
-                plugin.unregisterEvents();
                 plugin.registerEvents();
                 plugin.getPunishmentManager().reload();
                 Chat.message(sender, "&eReloaded configuration...");
