@@ -10,22 +10,28 @@ import org.bukkit.Bukkit;
 public class FactionsManager {
 
     private FactionsHook factionsHook;
-
     private final boolean factionsEnabled;
 
     public FactionsManager() {
         CombatLogger plugin = CombatLogger.getInstance();
 
-        if (Bukkit.getPluginManager().isPluginEnabled("Factions")) {
-            this.factionsHook = new FactionsUUID();
-            Bukkit.getPluginManager().registerEvents(new CommandFlightListener(), plugin);
-
-            this.factionsEnabled = true;
-
-            Chat.log("Enabled FactionsUUID Support");
-        } else {
+        if (!Bukkit.getPluginManager().isPluginEnabled("Factions")) {
             this.factionsEnabled = false;
+            return;
         }
 
+        try {
+            // Only enable the adapter for the MassiveCraft Factions API it
+            // understands; other plugins named "Factions" remain unaffected.
+            Class.forName("com.massivecraft.factions.FPlayers");
+            Class.forName("com.massivecraft.factions.cmd.FCmdRoot");
+            this.factionsHook = new FactionsUUID();
+            Bukkit.getPluginManager().registerEvents(new CommandFlightListener(), plugin);
+            this.factionsEnabled = true;
+            Chat.log("Enabled MassiveCraft FactionsUUID support");
+        } catch (ClassNotFoundException ex) {
+            this.factionsEnabled = false;
+            plugin.getLogger().warning("Factions is installed, but its API is not compatible. Factions-specific flight handling is disabled.");
+        }
     }
 }
