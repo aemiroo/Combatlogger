@@ -49,7 +49,7 @@ public class RegionUtil {
 
         if (!glassBufferLocations.isEmpty()) {
             for (Location glassBufferLocation : glassBufferLocations) {
-                player.sendBlockChange(glassBufferLocation, Material.GLASS.createBlockData());
+                player.sendBlockChange(glassBufferLocation, Material.GLASS, (byte) 0);
             }
         }
     }
