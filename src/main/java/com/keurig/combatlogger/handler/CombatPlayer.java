@@ -51,10 +51,8 @@ public class CombatPlayer {
     public void removePlayer(Player player) {
 
         this.players.remove(player.getUniqueId());
+        stopTasks(player);
         this.combatLogged.remove(player.getUniqueId());
-
-        if (this.taskCombat.get(player.getUniqueId()) != null)
-            stopTasks(player);
     }
 
 
@@ -77,7 +75,7 @@ public class CombatPlayer {
         if (player == null || !player.isOnline() || player.hasPermission("combatlogger.admin"))
             return;
 
-        final int combatTimer = this.plugin.getConfig().getInt("combat-timer");
+        final int combatTimer = Math.max(1, this.plugin.getConfig().getInt("combat-timer"));
 
         final boolean useChat = this.plugin.getConfig().getBoolean("chat.use");
         final String combatOnChat = plugin.replaceMsg(player, this.plugin.getConfig().getString("chat.on-message"));
@@ -100,9 +98,9 @@ public class CombatPlayer {
                 assert combatOnChat != null;
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', combatOnChat));
 
-                PlayerEnterCombatEvent enterCombatEvent = new PlayerEnterCombatEvent(player);
-                Bukkit.getPluginManager().callEvent(enterCombatEvent);
             }
+            PlayerEnterCombatEvent enterCombatEvent = new PlayerEnterCombatEvent(player);
+            Bukkit.getPluginManager().callEvent(enterCombatEvent);
         }
 
         if (!this.plugin.isFactionsEnabled()) {
@@ -167,7 +165,7 @@ public class CombatPlayer {
                 finalCombatOnActionBar = finalCombatOnActionBar.replace("%combatlogger_timeformatted%", Chat.timeFormat(CombatLoggerAPI.timeRemaining(player)));
                 finalCombatOnActionBar = finalCombatOnActionBar.replace("%combatlogger_time%", String.valueOf(CombatLoggerAPI.timeRemaining(player)));
                 ActionBar.sendActionBar(player, ChatColor.translateAlternateColorCodes('&', finalCombatOnActionBar));
-            }, 0, 0));
+            }, 0, 1));
         }
 
         // Store the current time in milliseconds when a player enters combat,
@@ -203,6 +201,8 @@ public class CombatPlayer {
         final String combatOffActionBar = plugin.replaceMsg(player, this.plugin.getConfig().getString("actionbar.off-message"));
 
 
+        stopTasks(player);
+
         // If configured to do so, send an ActionBar message to the player.
         if (useActionBar) {
             assert combatOffActionBar != null; // Ensure combatOffActionBar is not null
@@ -224,14 +224,22 @@ public class CombatPlayer {
     }
 
     private void stopTasks(Player player) {
-        if (taskActionBar.containsKey(player.getUniqueId()))
-            Bukkit.getScheduler().cancelTask(this.taskActionBar.get(player.getUniqueId()));
+        UUID playerId = player.getUniqueId();
 
-        if (taskCombat.containsKey(player.getUniqueId()))
-            Bukkit.getScheduler().cancelTask(this.taskCombat.get(player.getUniqueId()));
+        Integer actionBarTask = taskActionBar.remove(playerId);
+        if (actionBarTask != null) {
+            Bukkit.getScheduler().cancelTask(actionBarTask);
+        }
 
-        if (taskChat.containsKey(player.getUniqueId()))
-            Bukkit.getScheduler().cancelTask(this.taskChat.get(player.getUniqueId()));
+        Integer chatTask = taskChat.remove(playerId);
+        if (chatTask != null) {
+            Bukkit.getScheduler().cancelTask(chatTask);
+        }
+
+        Integer combatTask = taskCombat.remove(playerId);
+        if (combatTask != null) {
+            Bukkit.getScheduler().cancelTask(combatTask);
+        }
     }
 
     private boolean isTagged(Player player) {
