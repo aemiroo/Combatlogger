@@ -159,11 +159,16 @@ public class CombatPlayer {
 
         if (useActionBar) {
             this.taskActionBar.put(player.getUniqueId(), Bukkit.getScheduler().scheduleSyncRepeatingTask(this.plugin, () -> {
-                String finalCombatOnActionBar = combatOnActionBar;
+                if (!player.isOnline() || combatOnActionBar == null) {
+                    return;
+                }
 
-                finalCombatOnActionBar = finalCombatOnActionBar.replace("{timeRemaining}", Chat.timeFormat(CombatLoggerAPI.timeRemaining(player)));
-                finalCombatOnActionBar = finalCombatOnActionBar.replace("%combatlogger_timeformatted%", Chat.timeFormat(CombatLoggerAPI.timeRemaining(player)));
-                finalCombatOnActionBar = finalCombatOnActionBar.replace("%combatlogger_time%", String.valueOf(CombatLoggerAPI.timeRemaining(player)));
+                long remainingMillis = CombatLoggerAPI.timeRemaining(player);
+                String formattedTime = Chat.timeFormat(remainingMillis);
+                String finalCombatOnActionBar = combatOnActionBar
+                        .replace("{timeRemaining}", formattedTime)
+                        .replace("%combatlogger_timeformatted%", formattedTime)
+                        .replace("%combatlogger_time%", String.valueOf(remainingMillis));
                 ActionBar.sendActionBar(player, ChatColor.translateAlternateColorCodes('&', finalCombatOnActionBar));
             }, 0, 1));
         }
