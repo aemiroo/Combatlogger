@@ -3,44 +3,63 @@ package com.keurig.combatlogger.listeners;
 import com.keurig.combatlogger.CombatLogger;
 import com.keurig.combatlogger.api.CombatLoggerAPI;
 import com.keurig.combatlogger.utils.Chat;
-import com.massivecraft.factions.cmd.FCmdRoot;
-import org.bukkit.Bukkit;
+import com.keurig.combatlogger.utils.factions.FactionsHook;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
+import java.util.List;
+import java.util.Locale;
+
 public class CommandFlightListener implements Listener {
 
-	private final CombatLogger plugin = CombatLogger.getInstance();
+    private final CombatLogger plugin = CombatLogger.getInstance();
 
-	@EventHandler
-	public void onCommand(PlayerCommandPreprocessEvent event) {
-		final Player player = event.getPlayer();
-		final String label = event.getMessage().substring(1);
+    @EventHandler
+    public void onCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+        if (!CombatLoggerAPI.isTagged(player) || !plugin.isFactionsEnabled()) {
+            return;
+        }
 
-		if (Bukkit.getPluginManager().isPluginEnabled("Factions"))
-			for (String alias : FCmdRoot.getInstance().aliases) {
+        String command = event.getMessage();
+        if (command == null || command.length() < 2) {
+            return;
+        }
 
-				for (String subAlias : FCmdRoot.getInstance().cmdFly.aliases) {
+        String[] parts = command.substring(1).trim().split("\\s+", 2);
+        if (parts.length != 2) {
+            return;
+        }
 
-					if (label.equalsIgnoreCase(alias + " " + subAlias)) {
+        FactionsHook hook = CombatLogger.getFactionsHook();
+        if (hook == null) {
+            return;
+        }
 
-						if (CombatLoggerAPI.isTagged(player)) {
-							if (this.plugin.isFactionsEnabled()) {
-								CombatLogger.getFactionsHook().disableFlight(player);
+        String root = parts[0].toLowerCase(Locale.ROOT);
+        String sub = parts[1].split("\\s+", 2)[0].toLowerCase(Locale.ROOT);
+        List<String> aliases = hook.aliases();
+        List<String> subAliases = hook.subAliases();
 
-								player.sendMessage(Chat.color("&cYou cannot fly during combat!"));
+        boolean factionsFlyCommand = containsIgnoreCase(aliases, root)
+                && containsIgnoreCase(subAliases, sub);
+        if (!factionsFlyCommand) {
+            return;
+        }
 
-								event.setCancelled(true);
-							}
+        hook.disableFlight(player);
+        Chat.message(player, "&cYou cannot fly during combat!");
+        event.setCancelled(true);
+    }
 
-							return;
-						}
-
-					}
-				}
-			}
-	}
-
+    private boolean containsIgnoreCase(List<String> values, String target) {
+        for (String value : values) {
+            if (value != null && value.equalsIgnoreCase(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
