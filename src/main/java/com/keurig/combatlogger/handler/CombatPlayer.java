@@ -142,17 +142,7 @@ public class CombatPlayer {
                     finalIntervalMessage = finalIntervalMessage.replace("%combatlogger_timeformatted%", time);
                     finalIntervalMessage = finalIntervalMessage.replace("%combatlogger_time%", time);
 
-                    int timeRemainingSeconds = (int) (timeRemainingMillis / 1000);
-
-                    // Get the Bukkit server version
-                    String bukkitVersion = Bukkit.getVersion();
-
-                    // For some reason locally stored number is version dependant and this fixes it
-                    // and not sure why
-                    boolean isOldVersion = bukkitVersion.contains("1.8") || bukkitVersion.contains("1.7");
-                    if (!isOldVersion) {
-                        timeRemainingSeconds++; // Adjust for older versions
-                    }
+                    int timeRemainingSeconds = (int) ((timeRemainingMillis + 999L) / 1000L);
 
                     if (intervals.contains(timeRemainingSeconds)) {
                         Chat.message(player, finalIntervalMessage);
@@ -272,13 +262,15 @@ public class CombatPlayer {
     }
 
     public boolean isTagged(Player player) {
-        return this.combatLogged.containsKey(player.getUniqueId()) && this.combatLogged.get(player.getUniqueId()) > System.currentTimeMillis();
+        if (player == null) {
+            return false;
+        }
+        Long expiresAt = this.combatLogged.get(player.getUniqueId());
+        return expiresAt != null && expiresAt.longValue() > System.currentTimeMillis();
     }
 
     private long combatTimeRemaining(Player player) {
-        if (this.combatLogged.containsKey(player.getUniqueId()))
-            return this.combatLogged.get(player.getUniqueId()) - System.currentTimeMillis();
-
-        return 0;
+        Long expiresAt = this.combatLogged.get(player.getUniqueId());
+        return expiresAt == null ? 0L : Math.max(0L, expiresAt.longValue() - System.currentTimeMillis());
     }
 }
