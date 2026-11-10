@@ -56,13 +56,13 @@ public class Chat {
             return round ? "1s" : "0s";
         }
 
-        long totalSeconds = millis / 1000L;
-        if (round && millis % 1000L >= 500L) {
-            totalSeconds++;
-        }
-
-        long minutes = totalSeconds / 60L;
+        long totalSeconds = round ? (millis + 999L) / 1000L : millis / 1000L;
+        long hours = totalSeconds / 3600L;
+        long minutes = (totalSeconds % 3600L) / 60L;
         long seconds = totalSeconds % 60L;
+        if (hours > 0L) {
+            return String.format("%dh %dm %ds", hours, minutes, seconds);
+        }
         if (minutes > 0L) {
             return String.format("%dm %ds", minutes, seconds);
         }
