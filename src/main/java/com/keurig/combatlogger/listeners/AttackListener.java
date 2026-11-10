@@ -2,6 +2,7 @@ package com.keurig.combatlogger.listeners;
 
 import com.keurig.combatlogger.CombatLogger;
 import com.keurig.combatlogger.handler.CombatPlayer;
+import com.keurig.combatlogger.handler.CombatRules;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -42,7 +43,7 @@ public class AttackListener implements Listener {
         // even if a server implementation supplies different Player wrappers.
         UUID attackerId = attacker.getUniqueId();
         UUID targetId = target.getUniqueId();
-        if (attackerId.equals(targetId)) {
+        if (!CombatRules.isValidPlayerPair(attackerId, targetId)) {
             return;
         }
 
